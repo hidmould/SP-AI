@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>目标检测结果</title>
+    <title>图片/视频目标检测</title>
     <style>
         * {
             margin: 0;
@@ -84,6 +84,30 @@
             margin-top: 20px;
         }
         
+        .uploaded-image-container {
+            margin-bottom: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .uploaded-image-container h3 {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .uploaded-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-height: 500px;
+            object-fit: contain;
+        }
+        
         .detection-box {
             background: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -126,17 +150,230 @@
         .error p {
             color: #666;
         }
+        
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-weight: 500;
+            margin-top: 20px;
+            display: inline-block;
+        }
+        
+        .save-btn:hover {
+            background: #218838;
+        }
+        
+        .save-message {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 6px;
+            color: #155724;
+        }
+        
+        /* 模态框背景 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 模态框内容 */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* 关闭按钮 */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+        
+        /* 模态框标题 */
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .modal-header h3 {
+            color: #333;
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        /* 保存选项表单 */
+        .save-options-modal {
+            padding: 0;
+            margin: 0;
+        }
+        
+        .save-options-modal label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .save-options-modal input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        
+        .save-options-modal input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        
+        .save-options-modal input[type="text"]:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+
+        
+        /* 模态框按钮组 */
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+            text-align: right;
+        }
+        
+        .modal-btn {
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            margin-left: 10px;
+        }
+        
+        .modal-btn-primary {
+            background: #28a745;
+            color: white;
+        }
+        
+        .modal-btn-primary:hover {
+            background: #218838;
+        }
+        
+        .modal-btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .modal-btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        /* 图片预览区域 */
+        .preview-container {
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .preview-container.show {
+            display: block;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-height: 500px;
+            object-fit: contain;
+        }
+        
+        .preview-label {
+            color: #555;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>上传图片进行目标检测</h1>
+        <h1>上传图片或视频进行目标检测</h1>
         
         <form class="upload-form" method="post" action="/20231084039" enctype="multipart/form-data">
-            <input type="file" name="image" accept="image/*" required>
+            <input type="file" name="image" id="imageInput" accept="image/*,video/*" required>
             <br>
             <button type="submit">开始检测</button>
         </form>
+        
+        <!-- 图片预览区域 -->
+        <div class="preview-container" id="previewContainer">
+            <div class="preview-label">已选择的图片</div>
+            <img id="previewImage" class="preview-image" alt="图片预览" />
+        </div>
+        
+        <!-- 视频预览区域 -->
+        <div class="preview-container" id="videoPreviewContainer" style="display:none;">
+            <div class="preview-label">已选择的视频</div>
+            <video id="previewVideo" controls class="preview-image" style="width:100%;max-height:500px;">
+                <source src="" type="video/mp4">
+                您的浏览器不支持视频播放
+            </video>
+        </div>
 
         <!--结果展示-->
         <div th:if="${result!=null}">
@@ -153,12 +390,336 @@
                     </p>
                 </div>
             </div>
+            
+            <!-- 保存按钮 -->
+            <button class="save-btn" onclick="openSaveModal()">保存结果</button>
+        </div>
+        
+        <!-- 视频结果展示 -->
+        <div th:if="${videoResult!=null}">
+            <h2>视频检测完成，共 [[${#lists.size(videoResult)}]] 帧</h2>
+            <div style="margin-top:20px;">
+                <h3>检测结果统计：</h3>
+                <div class="uploaded-image-container">
+                    <p>总帧数：<strong>[[${#lists.size(videoResult)}]]</strong></p>
+                    <p>有目标的帧数：<strong id="framesWithObjects">计算中...</strong></p>
+                </div>
+            </div>
+            
+            <!-- 显示前 5 帧的详细结果 -->
+            <h3 style="margin-top:30px;">前 5 帧检测结果：</h3>
+            <div class="results-container" id="videoResultsContainer">
+                <div class="detection-box" th:each="frame, iterStat : ${videoResult}" th:if="${iterStat.index < 5}">
+                    <p style="font-weight:bold;">第 [[${iterStat.index + 1}]] 帧</p>
+                    <div th:if="${#lists.isEmpty(frame)}">
+                        <p style="color:#999;">未检测到目标</p>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(frame)}">
+                        <p>检测到 <strong>[[${#lists.size(frame)}]]</strong> 个目标：</p>
+                        <div th:each="detection : ${frame}" style="margin-left:15px;border-left:3px solid #667eea;padding-left:10px;margin-top:8px;">
+                            <p>类别：<span th:text="${detection[5]}"></span></p>
+                            <p>置信度：<span th:text="${#numbers.formatDecimal(detection[4],1,2)}"></span></p>
+                            <p>坐标：
+                                <span th:text="${#numbers.formatDecimal(detection[0],1,2)}"></span>, 
+                                <span th:text="${#numbers.formatDecimal(detection[1],1,2)}"></span>, 
+                                <span th:text="${#numbers.formatDecimal(detection[2],1,2)}"></span>, 
+                                <span th:text="${#numbers.formatDecimal(detection[3],1,2)}"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 保存按钮（视频） -->
+            <button class="save-btn" id="saveVideoBtn">保存结果</button>
+        </div>
+
+        <!-- 保存对话框（模态框） -->
+        <div id="saveModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>保存检测结果</h3>
+                    <span class="close" onclick="closeSaveModal()">&times;</span>
+                </div>
+                <div class="save-options-modal">
+                    <label for="savePath">选择保存位置：</label>
+                    <input type="text" id="savePath" placeholder="请输入保存路径（如：D:\\test）">
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn modal-btn-secondary" onclick="closeSaveModal()">取消</button>
+                    <button class="modal-btn modal-btn-primary" onclick="confirmSave()">确认保存</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 视频保存对话框（模态框） -->
+        <div id="saveVideoModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>保存视频检测结果</h3>
+                    <span class="close" onclick="closeSaveVideoModal()">&times;</span>
+                </div>
+                <div class="save-options-modal">
+                    <label for="videoSavePath">选择保存位置：</label>
+                    <input type="text" id="videoSavePath" placeholder="请输入保存路径（如：D:\\test）">
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn modal-btn-secondary" onclick="closeSaveVideoModal()">取消</button>
+                    <button class="modal-btn modal-btn-primary" onclick="confirmSaveVideo()">确认保存</button>
+                </div>
+            </div>
         </div>
 
         <div th:if="${error != null}" class="error">
             <h3>错误信息</h3>
             <p th:text="${error}"></p>
         </div>
+        
+        <div th:if="${saveMessage != null}" class="save-message">
+            <p th:text="${saveMessage}"></p>
+        </div>
     </div>
+    
+    <!-- 隐藏的表单用于提交保存 -->
+    <form id="saveForm" method="post" action="/save" style="display:none;">
+        <input type="hidden" name="resultData" id="resultData">
+        <input type="hidden" name="imageName" id="imageName">
+        <input type="hidden" name="savePath" id="savePathHidden">
+    </form>
+    
+    <!-- 隐藏的视频保存表单 -->
+    <form id="saveVideoForm" method="post" action="/save-video" style="display:none;">
+        <input type="hidden" name="resultData" id="videoResultData">
+        <input type="hidden" name="videoName" id="videoName">
+        <input type="hidden" name="savePath" id="videoSavePathHidden">
+    </form>
+    
+    <!-- 隐藏的视频结果数据（JSON） -->
+    <input type="hidden" id="videoResultJsonHidden" th:value="${videoResultJson != null ? videoResultJson : ''}">
+    <input type="hidden" id="videoNameHidden" th:value="${videoName != null ? videoName : ''}">
+    
+    <!-- JavaScript 处理保存功能 -->
+    <script th:inline="javascript">
+        console.log('=== JavaScript 开始加载 ===');
+        
+        // 图片和视频预览功能
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const videoPreviewContainer = document.getElementById('videoPreviewContainer');
+        const previewVideo = document.getElementById('previewVideo');
+        
+        // 页面加载时检查是否有图片或视频需要显示
+        window.addEventListener('DOMContentLoaded', function() {
+            // 如果有后端返回的图片名，也显示出来
+            var imageNameFromServer = /*[[${imageName}]]*/ null;
+            if (imageNameFromServer && previewContainer && previewImage) {
+                previewImage.src = '/uploads/' + imageNameFromServer;
+                previewContainer.classList.add('show');
+            }
+            
+            // 如果有后端返回的视频名，显示出来
+            var videoNameFromServer = /*[[${videoName}]]*/ null;
+            if (videoNameFromServer && videoPreviewContainer && previewVideo) {
+                previewVideo.querySelector('source').src = '/uploads/' + videoNameFromServer;
+                previewVideo.load();
+                videoPreviewContainer.style.display = 'block';
+            }
+        });
+        
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    
+                    // 判断是图片还是视频
+                    if (file.type.startsWith('image/')) {
+                        reader.onload = function(event) {
+                            previewImage.src = event.target.result;
+                            previewContainer.classList.add('show');
+                            videoPreviewContainer.style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (file.type.startsWith('video/')) {
+                        reader.onload = function(event) {
+                            previewVideo.querySelector('source').src = event.target.result;
+                            previewVideo.load();
+                            videoPreviewContainer.style.display = 'block';
+                            previewContainer.classList.remove('show');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            });
+        }
+        
+        // 打开保存对话框
+        function openSaveModal() {
+            console.log('打开保存对话框');
+            var modal = document.getElementById('saveModal');
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('对话框已显示');
+            } else {
+                console.error('找不到模态框元素');
+            }
+        }
+        
+        // 关闭保存对话框
+        function closeSaveModal() {
+            var modal = document.getElementById('saveModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // 打开视频保存对话框
+        function openSaveVideoModal() {
+            console.log('打开视频保存对话框');
+            var modal = document.getElementById('saveVideoModal');
+            console.log('模态框元素:', modal);
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('视频对话框已显示');
+            } else {
+                console.error('找不到视频模态框元素');
+            }
+        }
+        
+        // 关闭视频保存对话框
+        function closeSaveVideoModal() {
+            var modal = document.getElementById('saveVideoModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            var modal = document.getElementById('saveModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+            
+            var videoModal = document.getElementById('saveVideoModal');
+            if (event.target === videoModal) {
+                videoModal.style.display = 'none';
+            }
+        }
+        
+        // 确认保存
+        function confirmSave() {
+            console.log('开始确认保存...');
+            // 从页面提取检测结果数据
+            const resultData = [];
+            
+            /*[# th:each="detection : ${result}"]*/
+            resultData.push(/*[[${detection}]]*/);
+            /*[/]*/
+            
+            console.log('提取的结果数据:', resultData);
+            
+            if (resultData.length === 0) {
+                alert('没有检测到结果，无法保存！');
+                return;
+            }
+            
+            // 验证是否选择了保存路径
+            var savePathValue = document.getElementById('savePath').value.trim();
+            if (!savePathValue) {
+                alert('请输入保存路径后再点击确认保存！');
+                return;
+            }
+            
+            // 设置表单数据
+            document.getElementById('resultData').value = JSON.stringify(resultData);
+            var imageName = /*[[${imageName != null ? imageName : 'unknown'}]]*/ 'unknown';
+            document.getElementById('imageName').value = imageName;
+            document.getElementById('savePathHidden').value = savePathValue;
+            
+            console.log('准备保存...');
+            console.log('图片名:', imageName);
+            console.log('保存路径:', savePathValue);
+            console.log('结果数据:', resultData);
+            
+            // 关闭模态框
+            closeSaveModal();
+            
+            // 提交表单
+            document.getElementById('saveForm').submit();
+        }
+        
+        // 确认保存视频结果
+        function confirmSaveVideo() {
+            console.log('开始确认保存视频结果...');
+            
+            // 直接从隐藏的 input 获取 JSON 数据
+            const videoResultData = JSON.parse(document.getElementById('videoResultJsonHidden').value);
+            
+            console.log('提取的视频结果数据:', videoResultData);
+            
+            if (videoResultData.length === 0) {
+                alert('没有检测到结果，无法保存！');
+                return;
+            }
+            
+            // 验证是否选择了保存路径
+            var savePathValue = document.getElementById('videoSavePath').value.trim();
+            if (!savePathValue) {
+                alert('请输入保存路径后再点击确认保存！');
+                return;
+            }
+            
+            // 设置表单数据
+            document.getElementById('videoResultData').value = JSON.stringify(videoResultData);
+            var videoName = document.getElementById('videoNameHidden').value;
+            document.getElementById('videoName').value = videoName;
+            document.getElementById('videoSavePathHidden').value = savePathValue;
+            
+            console.log('准备保存视频...');
+            console.log('视频名:', videoName);
+            console.log('保存路径:', savePathValue);
+            console.log('结果数据帧数:', videoResultData.length);
+            
+            // 关闭模态框
+            closeSaveVideoModal();
+            
+            // 提交表单
+            document.getElementById('saveVideoForm').submit();
+        }
+        
+        // 计算有目标的帧数（使用 JavaScript）
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('=== 开始初始化视频保存功能 ===');
+            
+            var framesWithObjectsEl = document.getElementById('framesWithObjects');
+            if (framesWithObjectsEl) {
+                // 从页面统计非空的帧数
+                var detectionBoxes = document.querySelectorAll('#videoResultsContainer .detection-box');
+                var count = 0;
+                detectionBoxes.forEach(function(box) {
+                    // 如果没有"未检测到目标"的文字，说明有目标
+                    if (!box.textContent.includes('未检测到目标')) {
+                        count++;
+                    }
+                });
+                framesWithObjectsEl.textContent = count;
+            }
+            
+            // 绑定视频保存按钮的点击事件
+            var saveVideoBtn = document.getElementById('saveVideoBtn');
+            console.log('查找 saveVideoBtn 按钮:', saveVideoBtn);
+            if (saveVideoBtn) {
+                console.log('找到视频保存按钮，绑定点击事件');
+                saveVideoBtn.addEventListener('click', openSaveVideoModal);
+                console.log('事件绑定完成');
+            } else {
+                console.log('未找到视频保存按钮');
+            }
+            
+            console.log('=== 初始化完成 ===');
+        });
+    </script>
 </body>
 </html>
